@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.production)",
+      "Read(./storage/framework/**)",
+      "Read(./bootstrap/cache/**)",
+      "Read(./**/*.sql)",
+      "Read(./**/*.sql.gz)",
+      "Read(./backups/**)"
+    ]
+  }
+}
