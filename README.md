@@ -14,6 +14,14 @@ Todas as integrações (banco, gateway, webhooks) são **simuladas dentro do app
 
 Acesse `/demo/{modulo}` (ex.: `/demo/erp`) para entrar já logado com o usuário demo. O banco é recriado diariamente.
 
+## Demo online
+
+- **Versão estática (GitHub Pages):** https://lucaskrotz.github.io/Sistemas-de-Gest-o/ — todas as telas navegáveis,
+  somente leitura. Gerada por GitHub Actions (`php artisan snapshot:gerar`) a cada push e diariamente.
+- **Versão interativa (Render):** app completo (formulários, Kanban, webhooks, gateway) via `render.yaml` +
+  `docker/render/Dockerfile` (Apache + SQLite; banco recriado a cada início). A versão estática tem um botão
+  que leva para ela quando a variável `URL_INTERATIVA` está configurada no repositório.
+
 ## Stack
 
 - PHP 8.3 · Laravel 13 · MySQL 8.4 · Docker (php-fpm + nginx + mysql)

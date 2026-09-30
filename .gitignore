@@ -31,3 +31,6 @@ Thumbs.db
 *.sql.gz
 /backups
 /coverage
+
+# Versão estática gerada localmente
+/_site

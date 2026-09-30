@@ -210,6 +210,11 @@ div.dt-container table.dataTable thead > tr > th.dt-orderable-desc:hover { outli
 .topo .separador { width: 1px; height: 1rem; background: var(--border); }
 .topo h1 { font-size: 1rem; font-weight: 500; margin: 0; }
 
+/* Faixa da versão estática (GitHub Pages) */
+.faixa-estatica { background: var(--muted); border-bottom: 1px solid var(--border); color: var(--muted-foreground); }
+.faixa-estatica strong, .faixa-estatica a { color: var(--foreground); }
+.faixa-estatica svg { width: 14px; height: 14px; }
+
 /* ---------- Tabs / ToggleGroup (ex.: filtro de período) ---------- */
 .tabs { display: inline-flex; background: var(--muted); border-radius: var(--radius); padding: 3px; gap: 2px; }
 .tabs button { border: 1px solid transparent; background: transparent; color: var(--muted-foreground); font-size: .875rem; font-weight: 500; height: calc(2.25rem - 6px); padding: 0 .75rem; border-radius: calc(var(--radius) - 2px); }

@@ -67,6 +67,17 @@
     @endif
 
     <main class="flex-grow-1" style="min-width: 0">
+        @if (config('app.snapshot'))
+            {{-- Versão estática (GitHub Pages): somente leitura --}}
+            <div class="faixa-estatica px-3 px-lg-4 py-2 d-flex flex-wrap align-items-center gap-2 small">
+                <i data-lucide="eye"></i>
+                <span><strong>Versão estática</strong> · somente leitura, dados fictícios de {{ now()->format('d/m/Y') }}.</span>
+                @if (config('app.url_interativa'))
+                    <a href="{{ rtrim(config('app.url_interativa'), '/') }}/{{ $chave ? 'demo/'.$chave : '' }}" class="ms-auto fw-medium">
+                        Abrir versão interativa <i data-lucide="arrow-up-right"></i></a>
+                @endif
+            </div>
+        @endif
         <header class="topo px-3 px-lg-4 d-flex align-items-center gap-2">
             @if ($modulo)
                 <button class="btn btn-ghost btn-sm btn-icone d-lg-none" data-bs-toggle="offcanvas"
@@ -128,6 +139,25 @@
     Chart.defaults.scale.border.display = false;
     Chart.defaults.scale.ticks.padding = 8;
 
+    window.SNAPSHOT = @json(config('app.snapshot'));
+    if (SNAPSHOT) {
+        // Versão estática: nenhum formulário é enviado; avisa e aponta para a versão interativa.
+        document.addEventListener('submit', (e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const div = document.createElement('div');
+            div.className = 'toast align-items-center show position-fixed bottom-0 end-0 m-3';
+            div.setAttribute('role', 'status');
+            div.style.zIndex = 2000;
+            div.innerHTML = `<div class="toast-body d-flex gap-2 align-items-start">
+                <span>Esta é a versão estática (somente leitura). Ações como salvar, mover e simular funcionam na versão interativa.</span>
+                @if (config('app.url_interativa'))<a class="fw-medium text-nowrap" href="{{ rtrim(config('app.url_interativa'), '/') }}/{{ $chave ? 'demo/'.$chave : '' }}">Abrir</a>@endif
+            </div>`;
+            document.body.append(div);
+            setTimeout(() => div.remove(), 6000);
+        }, true);
+    }
+
     // Feedback de envio: desabilita o botão e mostra spinner (evita duplo clique).
     document.addEventListener('submit', (e) => {
         const btn = e.target.querySelector('button[type=submit], button:not([type])');
@@ -138,6 +168,7 @@
 
     // fetch com CSRF + JSON; lança erro com a mensagem do Laravel em respostas != 2xx.
     window.api = async (url, { method = 'GET', body } = {}) => {
+        if (SNAPSHOT && method !== 'GET') throw new Error('indisponível na versão estática');
         const res = await fetch(url, {
             method,
             headers: {

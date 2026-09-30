@@ -25,7 +25,8 @@
             <button type="button" data-dias="90" aria-pressed="false">90 dias</button>
             <button type="button" data-meses="12" aria-pressed="false">12 meses</button>
         </div>
-        <div class="d-flex align-items-end gap-2">
+        {{-- Intervalo livre só na versão interativa (a estática tem JSON só dos períodos rápidos) --}}
+        <div @class(['d-flex align-items-end gap-2', 'd-none' => config('app.snapshot')])>
             <div>
                 <label for="inicio" class="form-label small mb-1">De</label>
                 <input type="date" id="inicio" class="form-control" required>
@@ -186,13 +187,13 @@
         lucide.createIcons({ root: document.getElementById('kpis') });
     }
 
-    async function carregar(inicio, fim) {
+    async function carregar(inicio, fim, urlEstatica = null) {
         const painel = document.getElementById('painel');
         const erro = document.getElementById('erro');
         painel.setAttribute('aria-busy', 'true');
         erro.classList.add('d-none');
         try {
-            const d = await api(`{{ route('indicadores.dados') }}?inicio=${inicio}&fim=${fim}`);
+            const d = await api(urlEstatica ?? `{{ route('indicadores.dados') }}?inicio=${inicio}&fim=${fim}`);
             kpis(d.kpis, d.periodo);
 
             atualizarGrafico('faturamento', d.faturamento.labels, d.faturamento.valores);
@@ -210,7 +211,7 @@
 
             document.getElementById('resumo-periodo').textContent =
                 `${dataBr(d.periodo.inicio)} – ${dataBr(d.periodo.fim)} · agrupado por ${d.periodo.granularidade}`;
-            history.replaceState(null, '', `?inicio=${inicio}&fim=${fim}`);
+            if (!SNAPSHOT) history.replaceState(null, '', `?inicio=${inicio}&fim=${fim}`);
         } catch (e) {
             erro.textContent = e.message;
             erro.classList.remove('d-none');
@@ -226,7 +227,9 @@
     function aplicar(inicio, fim, botao = null) {
         campoIni.value = inicio; campoFim.value = fim;
         presets.forEach((b) => b.setAttribute('aria-pressed', b === botao));
-        carregar(inicio, fim);
+        // Versão estática: cada período rápido tem um JSON pré-gerado (snapshot:gerar).
+        const preset = botao && (botao.dataset.dias ?? `${botao.dataset.meses}m`);
+        carregar(inicio, fim, SNAPSHOT ? `{{ url('indicadores/dados') }}/${preset}.json` : null);
     }
 
     presets.forEach((b) => b.addEventListener('click', () => {
@@ -244,7 +247,7 @@
 
     // Estado inicial: período da URL ou "30 dias".
     const url = new URLSearchParams(location.search);
-    url.get('inicio') && url.get('fim')
+    !SNAPSHOT && url.get('inicio') && url.get('fim')
         ? aplicar(url.get('inicio'), url.get('fim'))
         : document.querySelector('[data-dias="30"]').click();
 </script>

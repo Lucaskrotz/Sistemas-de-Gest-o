@@ -1,0 +1,25 @@
+# Blueprint do Render (versão interativa): Dashboard → New → Blueprint → selecionar este repositório.
+services:
+  - type: web
+    name: sistemas-de-gestao
+    runtime: docker
+    plan: free
+    dockerfilePath: ./docker/render/Dockerfile
+    healthCheckPath: /up
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_LOCALE
+        value: pt_BR
+      - key: APP_FAKER_LOCALE
+        value: pt_BR
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/html/database/database.sqlite
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: FINANCEIRO_WEBHOOK_SECRET
+        generateValue: true

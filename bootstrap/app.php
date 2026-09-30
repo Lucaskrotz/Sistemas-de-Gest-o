@@ -26,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->preventRequestForgery(except: ['financeiro/webhook']);
 
+        // Render termina o HTTPS no proxy: confiar no X-Forwarded-* para gerar URLs https.
+        $middleware->trustProxies(at: '*');
+
         // Tenancy: tenant definido antes do route model binding (senão {id} de outra empresa seria resolvido).
         $middleware->prependToPriorityList(
             before: \Illuminate\Routing\Middleware\SubstituteBindings::class,

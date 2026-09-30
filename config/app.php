@@ -54,6 +54,12 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Versão estática (GitHub Pages): páginas somente leitura geradas por `php artisan snapshot:gerar`.
+    'snapshot' => (bool) env('APP_SNAPSHOT', false),
+
+    // URL da versão interativa (Render), usada nos links da versão estática. Vazio = sem link.
+    'url_interativa' => env('APP_URL_INTERATIVA'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

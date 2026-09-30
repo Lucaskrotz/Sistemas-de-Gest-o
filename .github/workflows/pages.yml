@@ -1,0 +1,76 @@
+# Versão estática (somente leitura) no GitHub Pages.
+# Sobe o app com SQLite, popula com dados fictícios e salva o HTML de cada tela (php artisan snapshot:gerar).
+# Roda a cada push e diariamente (datas relativas e SLA sempre "frescos").
+# Pré-requisito único: Settings → Pages → Source: "GitHub Actions".
+# Opcional: Settings → Secrets and variables → Actions → Variables → URL_INTERATIVA (URL do Render).
+name: GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      APP_SNAPSHOT: 'true'
+      APP_URL_INTERATIVA: ${{ vars.URL_INTERATIVA }}
+      APP_LOCALE: pt_BR
+      APP_FAKER_LOCALE: pt_BR
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ${{ github.workspace }}/database/snapshot.sqlite
+      SESSION_DRIVER: array
+      CACHE_STORE: array
+      QUEUE_CONNECTION: sync
+      LOG_CHANNEL: stderr
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, pdo_sqlite, zip, bcmath
+          coverage: none
+
+      - name: Dependências
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Banco SQLite com dados fictícios
+        run: |
+          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+          touch "$DB_DATABASE"
+
+      - run: php artisan migrate:fresh --seed --force
+
+      - name: Gerar páginas estáticas
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          php artisan snapshot:gerar --base="https://${owner}.github.io/${{ github.event.repository.name }}" --saida=_site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
