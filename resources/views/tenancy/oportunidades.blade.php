@@ -10,7 +10,7 @@
 <style>
     .pipeline { display: grid; grid-template-columns: repeat(5, minmax(220px, 1fr)); gap: 1rem; overflow-x: auto; padding-bottom: .5rem; }
     .etapa { background: var(--muted); border-radius: calc(var(--radius) + 4px); padding: .5rem; min-height: 50vh; }
-    .oport { background: var(--background); border: 1px solid var(--border); border-radius: var(--radius); padding: .75rem; margin-bottom: .5rem; box-shadow: var(--shadow-xs); }
+    .oport { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: .75rem; margin-bottom: .5rem; box-shadow: var(--shadow-xs); }
 </style>
 @endpush
 

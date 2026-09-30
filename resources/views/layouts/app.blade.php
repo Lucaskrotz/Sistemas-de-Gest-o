@@ -11,6 +11,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', $modulo['nome'] ?? config('app.name')) · Portfólio</title>
 
+    {{-- Tema antes de renderizar (sem "piscar" branco): escolha salva ou preferência do sistema. --}}
+    <script>
+        (() => {
+            let tema = null;
+            try { tema = localStorage.getItem('tema'); } catch (e) {}
+            const escuro = tema === 'dark' || (tema !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+            document.documentElement.setAttribute('data-bs-theme', escuro ? 'dark' : 'light');
+        })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
@@ -85,7 +95,20 @@
                 <span class="separador d-lg-none"></span>
             @endif
             <h1>@yield('header', $modulo['nome'] ?? config('app.name'))</h1>
-            <div class="ms-auto d-flex gap-2">@yield('actions')</div>
+            <div class="ms-auto d-flex gap-2">
+                @yield('actions')
+                {{-- Mode toggle (padrão shadcn): Claro / Escuro / Sistema --}}
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-icone" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Alternar tema" title="Tema">
+                        <i data-lucide="sun" class="icone-claro"></i><i data-lucide="moon" class="icone-escuro"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end" style="min-width: 9rem">
+                        <button type="button" class="dropdown-item" data-tema="light"><i data-lucide="sun"></i> Claro</button>
+                        <button type="button" class="dropdown-item" data-tema="dark"><i data-lucide="moon"></i> Escuro</button>
+                        <button type="button" class="dropdown-item" data-tema="system"><i data-lucide="monitor"></i> Sistema</button>
+                    </div>
+                </div>
+            </div>
         </header>
 
         <div class="p-3 p-lg-4">
@@ -125,19 +148,47 @@
         pageLength: 10,
     });
 
+    // ---- Tema claro/escuro ----
+    window.cor = (token) => getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+    const midiaEscura = matchMedia('(prefers-color-scheme: dark)');
+    const temaSalvo = () => { try { return localStorage.getItem('tema') || 'system'; } catch (e) { return 'system'; } };
+
+    function aplicarTema(tema) {
+        const escuro = tema === 'dark' || (tema === 'system' && midiaEscura.matches);
+        document.documentElement.setAttribute('data-bs-theme', escuro ? 'dark' : 'light');
+        document.querySelectorAll('[data-tema]').forEach((b) => b.classList.toggle('active', b.dataset.tema === tema));
+        temaGraficos();
+    }
+    document.querySelectorAll('[data-tema]').forEach((b) => b.addEventListener('click', () => {
+        try { localStorage.setItem('tema', b.dataset.tema); } catch (e) {}
+        aplicarTema(b.dataset.tema);
+    }));
+    midiaEscura.addEventListener('change', () => temaSalvo() === 'system' && aplicarTema('system'));
+
     // Gráficos no estilo shadcn/ui charts: grade horizontal discreta, sem linhas de eixo, tooltip em card.
-    Object.assign(Chart.defaults, { color: '#737373', borderColor: '#e5e5e5', maintainAspectRatio: false });
+    // Cores vêm dos tokens CSS (--chart-*), então acompanham o tema.
+    Chart.defaults.maintainAspectRatio = false;
     Chart.defaults.font.family = "'Geist', ui-sans-serif, system-ui, sans-serif";
     Chart.defaults.font.size = 12;
     Object.assign(Chart.defaults.plugins.tooltip, {
-        backgroundColor: '#ffffff', titleColor: '#0a0a0a', bodyColor: '#0a0a0a', footerColor: '#737373',
-        borderColor: '#e5e5e5', borderWidth: 1, padding: 10, cornerRadius: 8, boxPadding: 4,
-        usePointStyle: true, titleFont: { weight: 600 },
+        borderWidth: 1, padding: 10, cornerRadius: 8, boxPadding: 4, usePointStyle: true, titleFont: { weight: 600 },
     });
-    Object.assign(Chart.defaults.plugins.legend.labels, { usePointStyle: true, pointStyle: 'rectRounded', boxWidth: 8, boxHeight: 8, color: '#0a0a0a' });
+    Object.assign(Chart.defaults.plugins.legend.labels, { usePointStyle: true, pointStyle: 'rectRounded', boxWidth: 8, boxHeight: 8 });
     Chart.defaults.scale.grid.drawTicks = false;
     Chart.defaults.scale.border.display = false;
     Chart.defaults.scale.ticks.padding = 8;
+
+    function temaGraficos() {
+        Chart.defaults.color = cor('--chart-texto');
+        Chart.defaults.borderColor = cor('--chart-grid');
+        Object.assign(Chart.defaults.plugins.tooltip, {
+            backgroundColor: cor('--chart-tooltip'), titleColor: cor('--foreground'), bodyColor: cor('--foreground'),
+            footerColor: cor('--muted-foreground'), borderColor: cor('--border'),
+        });
+        Chart.defaults.plugins.legend.labels.color = cor('--chart-rotulo');
+        Object.values(Chart.instances).forEach((g) => g.update('none'));
+    }
+    aplicarTema(temaSalvo());
 
     window.SNAPSHOT = @json(config('app.snapshot'));
     if (SNAPSHOT) {

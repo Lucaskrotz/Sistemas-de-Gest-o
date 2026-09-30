@@ -91,24 +91,26 @@
 
 @push('scripts')
 <script>
-    // Paleta categórica validada (skill dataviz): slot 1 azul, slot 2 laranja.
-    const SERIE_1 = '#2a78d6', SERIE_2 = '#eb6834';
+    // Paleta categórica validada (skill dataviz): slot 1 azul, slot 2 laranja — tons por tema em app.css (--chart-*).
+    // Cores como funções (scriptable options): o update() da troca de tema relê os tokens.
+    const SERIE_1 = () => cor('--chart-1'), SERIE_2 = () => cor('--chart-2');
+    const SUPERFICIE = () => cor('--card'), ROTULO = () => cor('--chart-rotulo');
     const brl = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const brlCurto = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(v);
     const num = (v, casas = 0) => v.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
     const dataBr = (iso) => iso.split('-').reverse().join('/');
     const iso = (d) => d.toLocaleDateString('sv-SE');
 
-    const eixoValor = (fmt) => ({ grid: { color: '#f0f0f0' }, ticks: { callback: (v) => fmt(v), maxTicksLimit: 5 }, beginAtZero: true });
+    const eixoValor = (fmt) => ({ ticks: { callback: (v) => fmt(v), maxTicksLimit: 5 }, beginAtZero: true });
     const semGrade = { grid: { display: false } };
     const barra = { borderRadius: 4, maxBarThickness: 22, borderSkipped: 'start' };
 
     const graficos = {
         faturamento: new Chart('g-faturamento', {
             type: 'line',
-            data: { labels: [], datasets: [{ label: 'Faturamento', data: [], borderColor: SERIE_1, backgroundColor: 'rgba(42,120,214,.08)',
+            data: { labels: [], datasets: [{ label: 'Faturamento', data: [], borderColor: SERIE_1, backgroundColor: () => cor('--chart-1-fill'),
                 fill: true, borderWidth: 2, tension: .35, pointRadius: 0, pointHoverRadius: 5, pointHitRadius: 12,
-                pointHoverBackgroundColor: SERIE_1, pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2 }] },
+                pointHoverBackgroundColor: SERIE_1, pointHoverBorderColor: SUPERFICIE, pointHoverBorderWidth: 2 }] },
             options: {
                 interaction: { mode: 'index', intersect: false },
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ` ${brl(c.parsed.y)}` } } },
@@ -121,14 +123,14 @@
             options: {
                 indexAxis: 'y',
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ` ${brl(c.parsed.x)}` } } },
-                scales: { x: eixoValor(brlCurto), y: { ...semGrade, ticks: { color: '#0a0a0a', callback(v) { const t = this.getLabelForValue(v); return t.length > 18 ? t.slice(0, 17) + '…' : t; } } } },
+                scales: { x: eixoValor(brlCurto), y: { ...semGrade, ticks: { color: ROTULO, callback(v) { const t = this.getLabelForValue(v); return t.length > 18 ? t.slice(0, 17) + '…' : t; } } } },
             },
         }),
         chamados: new Chart('g-chamados', {
             type: 'bar',
             data: { labels: [], datasets: [
-                { label: 'Abertos', data: [], backgroundColor: SERIE_1, ...barra, borderColor: '#fff', borderWidth: { top: 0, left: 1, right: 1 } },
-                { label: 'Resolvidos', data: [], backgroundColor: SERIE_2, ...barra, borderColor: '#fff', borderWidth: { top: 0, left: 1, right: 1 } },
+                { label: 'Abertos', data: [], backgroundColor: SERIE_1, ...barra, borderColor: SUPERFICIE, borderWidth: { top: 0, left: 1, right: 1 } },
+                { label: 'Resolvidos', data: [], backgroundColor: SERIE_2, ...barra, borderColor: SUPERFICIE, borderWidth: { top: 0, left: 1, right: 1 } },
             ] },
             options: {
                 interaction: { mode: 'index', intersect: false },
@@ -142,7 +144,7 @@
             options: {
                 indexAxis: 'y',
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ` ${brl(c.parsed.x)}` } } },
-                scales: { x: eixoValor(brlCurto), y: { ...semGrade, ticks: { color: '#0a0a0a' } } },
+                scales: { x: eixoValor(brlCurto), y: { ...semGrade, ticks: { color: ROTULO } } },
             },
         }),
     };

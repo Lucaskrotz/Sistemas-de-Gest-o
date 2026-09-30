@@ -10,7 +10,7 @@
     .kanban { display: grid; grid-template-columns: repeat(4, minmax(270px, 1fr)); gap: 1rem; overflow-x: auto; padding-bottom: .5rem; }
     .coluna { background: var(--muted); border-radius: calc(var(--radius) + 4px); padding: .5rem; min-height: 60vh; transition: background .2s, box-shadow .2s; }
     .coluna.alvo { background: color-mix(in srgb, var(--destaque) 10%, var(--muted)); box-shadow: inset 0 0 0 2px var(--destaque); }
-    .cartao { background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--cor-prio); border-radius: var(--radius);
+    .cartao { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--cor-prio); border-radius: var(--radius);
         padding: .75rem; margin-bottom: .6rem; cursor: grab; transition: box-shadow .2s, transform .2s; }
     .cartao:hover { box-shadow: 0 4px 12px rgba(15,23,42,.08); }
     .cartao.arrastando { opacity: .5; transform: rotate(1deg); }

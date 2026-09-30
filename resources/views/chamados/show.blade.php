@@ -17,7 +17,7 @@
     .timeline { list-style: none; padding: 0; margin: 0; position: relative; }
     .timeline::before { content: ''; position: absolute; left: 15px; top: 4px; bottom: 4px; width: 2px; background: var(--border); }
     .timeline li { position: relative; padding-left: 44px; padding-bottom: 1.25rem; }
-    .timeline .marco { position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; background: #fff;
+    .timeline .marco { position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--card);
         border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted-foreground); }
     .timeline .comentario .marco { border-color: var(--destaque); color: var(--destaque); }
     .timeline .comentario .texto { background: var(--muted); border: 1px solid var(--border); border-radius: .5rem; padding: .6rem .8rem; white-space: pre-line; }
